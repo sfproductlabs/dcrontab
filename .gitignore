@@ -1,0 +1,6 @@
+dcrontab-data
+/dcron
+/dcrontab/gorocksdb
+cpphelloworld/cpphelloworld
+*.o
+*.so

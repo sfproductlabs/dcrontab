@@ -1,0 +1,45 @@
+{
+    "ClusterID": 128,
+    "Addresses": [
+        "172.17.0.1:63001",
+		"localhost:63002",
+		"localhost:63003"
+    ],
+    "Debug": true,
+    "UseLocalTLS": true,
+    "TLSCert" : "./.setup/keys/example/server.crt",
+    "TLSKey" : "./.setup/keys/example/server.key",
+    "TLSCACert" : "./.setup/keys/example/ca.crt",
+    "Services": [{
+        "Service": "nats",
+        "Hosts": [
+            "tls://localhost:4222"
+        ],
+        "Context": "toc.track.notify",
+        "Secure": true,
+        "CACert": "./.setup/keys/staging/rootCa.crt",
+        "Cert": "./.setup/keys/staging/nats-client.crt",
+        "Key": "./.setup/keys/staging/nats-client.key",
+        "Format": "json"
+    }],
+    "Commands": [
+        {
+            "Type": "shell",
+            "Exec" : "ls",
+            "Args" : "-al",
+            "Timeout" : 300,            
+            "Secure": false,
+            "Retry": 0,
+            "Critical" : false 
+        },
+        {
+            "Type": "nats",
+            "Exec" : "system.check",
+            "Args" : "{'ok':true}",
+            "Timeout" : 3000,            
+            "Secure": false,
+            "Retry": 3,
+            "Critical" :true
+        }
+    ]
+}
