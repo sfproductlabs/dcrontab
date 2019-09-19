@@ -106,7 +106,8 @@ type Configuration struct {
 	NatsService				 Service
 }
 
-func checkCron(cmd *Command) bool {
+func checkCron(cron *Cron) bool {
+	//Let's check!
 	return true
 }
 
@@ -376,7 +377,7 @@ func main() {
 								}								
 								cmd := &Command{}
 								if err:= json.Unmarshal([]byte(items[k]), &cmd); err == nil && cmd.Type != "" && cmd.Exec != "" {
-									if !checkCron(cmd) {
+									if &cmd.Cron != nil && !checkCron(&cmd.Cron) {
 										continue
 									}
 									switch cmd.Type {
