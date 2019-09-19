@@ -33,6 +33,7 @@ import (
 	"sync/atomic"
 	"time"
 	"unsafe"
+	"strings"
 
 	"github.com/dioptre/dcrontab/v3/dcrontab/gorocksdb"
 	sm "github.com/lni/dragonboat/v3/statemachine"
@@ -325,13 +326,47 @@ func (d *Commander) Open(stopc <-chan struct{}) (uint64, error) {
 // Lookup queries the state machine.
 func (d *Commander) Lookup(key interface{}) (interface{}, error) {
 	db := (*rocksdb)(atomic.LoadPointer(&d.db))
-	if db != nil {
-		v, err := db.lookup(key.([]byte))
-		if err == nil && d.closed {
-			panic("lookup returned valid result when Commander is already closed")
-		}
-		return v, err
+	action := &Action{
+		Action: "GET",
+		Key: string(key.([]byte)),
 	}
+	if err := json.Unmarshal(key.([]byte), action); err != nil {
+		
+	} 
+	if db != nil {
+		switch action.Action {
+			case "SCAN":
+				items := make(map[string]string)
+				ro := gorocksdb.NewDefaultReadOptions()
+				ro.SetFillCache(false)
+				it := db.db.NewIterator(ro)
+				defer it.Close()
+				it.Seek([]byte(action.Key))
+				for it = it; it.Valid(); it.Next() {
+					key := it.Key()
+					value := it.Value()
+					k := string(key.Data())
+					if !strings.HasPrefix(k, action.Key) {
+						key.Free()
+						value.Free()
+						break;
+					}
+					items[k] = string(value.Data())
+					key.Free()
+					value.Free()
+				}				
+				return json.Marshal(items);
+			//case "GET":
+			default:			
+				v, err := db.lookup([]byte(action.Key))
+				if err == nil && d.closed {
+					panic("lookup returned valid result when Commander is already closed")
+				}
+				return v, err
+
+		}
+		
+	}	
 	return nil, errors.New("db closed")
 }
 

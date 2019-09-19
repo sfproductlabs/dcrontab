@@ -60,6 +60,18 @@ type Service struct {
 
 }
 
+//* = everything, minute (0-59), hour (0-23, 0 = midnight), day (1-31), month (1-12), weekday (0-6, 0 = Sunday). 
+// Ex. every 10 minutes */10
+// Ex. 
+type Cron struct {
+	Minute string
+	Hour string
+	Day string
+	Month string
+	Weekday string
+	Once bool
+}
+
 type Command struct {
 	Type string
 	Exec string
@@ -68,6 +80,8 @@ type Command struct {
 	Secure bool
 	Retry int
 	Critical bool
+	Cron Cron
+	Comment string
 }
 
 type Configuration struct {
@@ -205,7 +219,7 @@ func main() {
 	}
 	
 	if len(*addr) == 0 && (*nodeID == 0 || *nodeID > len(configuration.Addresses)) {
-		fmt.Fprintf(os.Stderr, "nodeid must be one of the addresses specified in config or a public ip address must match an address\n")
+		fmt.Fprintf(os.Stderr, "[ERROR] nodeid must be one of the addresses specified in config or a public ip address must match an address\n")
 		os.Exit(1)
 	}
 
@@ -216,7 +230,7 @@ func main() {
 	} else {
 		nodeAddr = peers[uint64(*nodeID)]
 	}
-	fmt.Fprintf(os.Stdout, "node address: %s\n", nodeAddr)
+	fmt.Fprintf(os.Stdout, "Node address: %s, Node ID: %d\n", nodeAddr, *nodeID)
 	
 	//////////////////////////////////////// Setup Loggers
 	//logger.SetLoggerFactory()
@@ -248,9 +262,10 @@ func main() {
 		panic(err)
 	}
 	if err := nh.StartOnDiskCluster(peers, *join, NewCommander, rc); err != nil {
-		fmt.Fprintf(os.Stderr, "failed to add cluster, %v\n", err)
+		fmt.Fprintf(os.Stderr, "[ERROR] failed to add cluster, %v\n", err)
 		os.Exit(1)
 	}
+	leaderStopper := syncutil.NewStopper()
 	raftStopper := syncutil.NewStopper()
 	consoleStopper := syncutil.NewStopper()
 	ch := make(chan string, 16)
@@ -270,6 +285,43 @@ func main() {
 			ch <- s
 		}
 	})
+
+	leaderStopper.RunWorker(func() {
+		// this goroutine makes a linearizable read every 10 second. it returns the
+		// Count value maintained in IStateMachine. see datastore.go for details.
+		// nextTime :=  time.Now().Truncate(time.Minute)
+		// time.Sleep(time.Until(nextTime))
+		ticker := time.NewTicker(10 * time.Second)
+		for {
+			select {
+			case <-ticker.C:
+				leader, _, _ := nh.GetLeaderID(configuration.ClusterID)
+				if  leader == uint64(*nodeID) {
+					action := &Action{
+						Action: "SCAN",
+						Key: "dcron",
+					}
+					data, err := json.Marshal(action)
+					if err != nil {
+						panic(err)
+					}
+					ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+					result, err := nh.SyncRead(ctx, configuration.ClusterID, data)
+					cancel()
+					if err == nil {					
+						fmt.Fprintf(os.Stdout, "SCAN: %s\n", result)
+					} else {
+						fmt.Fprintf(os.Stdout, "SCAN ERROR: %s\n", err)
+					}
+				} else {
+					fmt.Printf("Deferring command to node: %d\n", leader)
+				}				
+			case <-leaderStopper.ShouldStop():
+				return
+			}
+		}
+	})
+
 	raftStopper.RunWorker(func() {
 		cs := nh.GetNoOPSession(configuration.ClusterID)
 		for {

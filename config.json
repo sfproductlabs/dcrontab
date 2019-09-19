@@ -30,7 +30,16 @@
             "Timeout" : 300,            
             "Secure": false,
             "Retry": 0,
-            "Critical" : false 
+            "Critical" : false,
+            "Cron": {
+                "Minute" : "*",
+                "Hour" : "*",
+                "Day" : "*",
+                "Month" : "*",
+                "Weekday" : "*",
+                "Once": false
+            },
+            "Comment" : "Demo command runs every minute"
         },
         {
             "Type": "nats",
