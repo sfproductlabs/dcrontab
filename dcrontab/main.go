@@ -49,6 +49,10 @@ const (
 	DELETE	
 )
 
+const (
+	ROOT_KEY string = "__dcron"
+)
+
 type Service struct {
 	Service  string
 	Hosts    []string
@@ -287,8 +291,9 @@ func main() {
 	})
 
 	leaderStopper.RunWorker(func() {
-		// this goroutine makes a linearizable read every 10 second. it returns the
-		// Count value maintained in IStateMachine. see datastore.go for details.
+		cs := nh.GetNoOPSession(configuration.ClusterID)
+		// this goroutine makes a linearizable read every 60 seconds
+		// then runs the commands required
 		// nextTime :=  time.Now().Truncate(time.Minute)
 		// time.Sleep(time.Until(nextTime))
 		ticker := time.NewTicker(10 * time.Second)
@@ -299,7 +304,7 @@ func main() {
 				if  leader == uint64(*nodeID) {
 					action := &Action{
 						Action: "SCAN",
-						Key: "dcron",
+						Key: ROOT_KEY,
 					}
 					data, err := json.Marshal(action)
 					if err != nil {
@@ -307,12 +312,50 @@ func main() {
 					}
 					ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 					result, err := nh.SyncRead(ctx, configuration.ClusterID, data)
-					cancel()
-					if err == nil {					
-						fmt.Fprintf(os.Stdout, "SCAN: %s\n", result)
+					if err == nil {											
+						items := make(map[string]string)
+						json.Unmarshal(result.([]byte), &items)
+						if len(items) == 0 {
+							fmt.Println("[SETTING UP] : Running")
+							//First time we've run
+							//Add the root key 
+							action := &Action{
+								Action: "PUT",
+								Key: ROOT_KEY,
+								Val: "OK",
+							}
+							data, err := json.Marshal(action)
+							if err != nil {
+								panic(err)
+							}
+							_, err = nh.SyncPropose(ctx, cs, data)
+							if err != nil {
+								fmt.Fprintf(os.Stderr, "SyncPropose returned error %v\n", err)
+							}
+							//and populate commands
+							for idx, v := range configuration.Commands {
+								action.Key = fmt.Sprintf("%s::%d", ROOT_KEY, idx)
+								if data, err = json.Marshal(v); err == nil {
+									action.Val = string(data)
+									if a, e := json.Marshal(action); e == nil {
+										_, e = nh.SyncPropose(ctx, cs, a)
+									}
+								}
+							}
+							fmt.Println("[SETTING UP] : Complete")
+						} else {
+							for key, value := range items { 
+								// if (key == ROOT_KEY) {
+								// 	continue;
+								// }
+								fmt.Println(key, value) 
+							}
+						}
 					} else {
-						fmt.Fprintf(os.Stdout, "SCAN ERROR: %s\n", err)
+						//TODO: Remove						
+						panic(err)
 					}
+					cancel()
 				} else {
 					fmt.Printf("Deferring command to node: %d\n", leader)
 				}				
