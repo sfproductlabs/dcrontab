@@ -9,7 +9,15 @@ github.com/lni/dragonboat/v3 v3.1.0/go.mod h1:EQ/59ROPqeDktEFaZcz0lXSSnM74Yj7r92
 github.com/lni/goutils v1.0.1 h1:b0RTWAg84viMYUy9zJZGATzyXZlCLra3HqMgzydCx8I=
 github.com/lni/goutils v1.0.1/go.mod h1:f2YgTtVeGFUdJrZJmtf0S05qYvSZXdmBxa5Z8nhBU/Q=
 github.com/lni/goutils v1.0.2 h1:XEQvY9GWR/4cUA35l55tIroD9gA2wlByOAu3thdnThA=
+github.com/nats-io/nats.go v1.8.1 h1:6lF/f1/NN6kzUDBz6pyvQDEXO39jqXcWRLu/tKjtOUQ=
+github.com/nats-io/nats.go v1.8.1/go.mod h1:BrFz9vVn0fU3AcH9Vn4Kd7W0NpJ651tD5omQ3M8LwxM=
+github.com/nats-io/nkeys v0.0.2 h1:+qM7QpgXnvDDixitZtQUBDY9w/s9mu1ghS+JIbsrx6M=
+github.com/nats-io/nkeys v0.0.2/go.mod h1:dab7URMsZm6Z/jp9Z5UGa87Uutgc2mVpXLC4B7TDb/4=
+github.com/nats-io/nuid v1.0.1 h1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=
+github.com/nats-io/nuid v1.0.1/go.mod h1:19wcPz3Ph3q0Jbyiqsd0kePYG7A95tJPxeL+1OSON2c=
 github.com/valyala/fastrand v1.0.0 h1:LUKT9aKer2dVQNUi3waewTbKV+7H17kvWFNKs2ObdkI=
 github.com/valyala/fastrand v1.0.0/go.mod h1:HWqCzkrkg6QXT8V2EXWvXCoow7vLwOFN002oeRzjapQ=
 github.com/valyala/histogram v1.0.1 h1:FzA7n2Tz/wKRMejgu3PV1vw3htAklTjjuoI6z3d4KDg=
 github.com/valyala/histogram v1.0.1/go.mod h1:lQy0xA4wUz2+IUnf97SivorsJIp8FxsnRd6x25q7Mto=
+golang.org/x/crypto v0.0.0-20181203042331-505ab145d0a9 h1:mKdxBk7AujPs8kU4m80U72y/zjbZ3UcXC7dClwKbUI0=
+golang.org/x/crypto v0.0.0-20181203042331-505ab145d0a9/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=

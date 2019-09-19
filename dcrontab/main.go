@@ -36,7 +36,7 @@ import (
 	"errors"
 	"sort"
 	"os/exec"
-
+	"log"
 
 	"github.com/lni/dragonboat/v3"
 	"github.com/lni/dragonboat/v3/config"
@@ -64,7 +64,8 @@ type Service struct {
 	Key      string
 	Secure   bool
 	Critical bool
-
+	Context  string
+	Format 	 string
 }
 
 //* = everything, minute (0-59), hour (0-23, 0 = midnight), day (1-31), month (1-12), weekday (0-6, 0 = Sunday). 
@@ -102,8 +103,12 @@ type Configuration struct {
 	TLSKey                   string
 	Commands                 []Command
 	Debug                    bool
+	NatsService				 Service
 }
 
+func checkCron(cmd *Command) bool {
+	return true
+}
 
 func parseCommand(msg string) (RequestType, string, string, bool) {
 	parts := strings.Split(strings.TrimSpace(msg), " ")
@@ -200,7 +205,7 @@ func main() {
 		os.Exit(1)
 	}
 	
-	//////////////////////////////////////// SETUP
+	//////////////////////////////////////// SETUP NETWORK
 	// https://github.com/golang/go/issues/17393
 	if runtime.GOOS == "darwin" {
 		signal.Ignore(syscall.Signal(0xd))
@@ -230,7 +235,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	
 	var nodeAddr string
 	if len(*addr) != 0 {
 		nodeAddr = *addr
@@ -245,6 +249,18 @@ func main() {
 	logger.GetLogger("rsm").SetLevel(logger.WARNING)
 	logger.GetLogger("transport").SetLevel(logger.WARNING)
 	logger.GetLogger("grpc").SetLevel(logger.WARNING)
+
+	//////////////////////////////////////// Setup NATS
+	gonats := NatsService{
+		Configuration: &configuration.NatsService,
+		AppConfig:     &configuration,
+	}
+	err = gonats.connect()	 
+	if err != nil && &configuration.NatsService != nil {
+		log.Fatalf("[CRITICAL] Could not connect to NATS Cluster. %s\n", err)		
+	}
+
+	//////////////////////////////////////// Setup RAFT
 	rc := config.Config{
 		NodeID:             uint64(*nodeID),
 		ClusterID:          configuration.ClusterID,
@@ -272,6 +288,8 @@ func main() {
 		fmt.Fprintf(os.Stderr, "[ERROR] failed to add cluster, %v\n", err)
 		os.Exit(1)
 	}
+
+	//////////////////////////////////////// RUN SERVICES
 	leaderStopper := syncutil.NewStopper()
 	raftStopper := syncutil.NewStopper()
 	consoleStopper := syncutil.NewStopper()
@@ -358,15 +376,19 @@ func main() {
 								}								
 								cmd := &Command{}
 								if err:= json.Unmarshal([]byte(items[k]), &cmd); err == nil && cmd.Type != "" && cmd.Exec != "" {
-									fmt.Println(cmd)
+									if !checkCron(cmd) {
+										continue
+									}
 									switch cmd.Type {
 									case "nats":
-										fmt.Println("[WARNING] NATS Not implemented")
+										gonats.publish(cmd.Exec, cmd.Args)
+										fmt.Printf("[EXECUTION COMPLETE] NATS, Input:\n%s\n", cmd)	
 									case "shell":
+										//TODO: move to a go subroutine
 										cmd := exec.Command(cmd.Exec, cmd.Args)
 										out, err := cmd.CombinedOutput()
 										if err == nil {
-											fmt.Printf("[EXECUTION COMPLETE] combined out:\n%s\n", string(out))	
+											fmt.Printf("[EXECUTION COMPLETE] SHELL, Input:\n%s\nOutput:\n%s\n", cmd, string(out))	
 										}
 										
 									}
