@@ -1,5 +1,8 @@
 ## Distributed crontab (dcrontab)
 
+#### Requirements
+**Go > Version 1.12**
+
 WORK IN PROGRESS
 
 #### Building
