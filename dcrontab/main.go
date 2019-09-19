@@ -34,6 +34,9 @@ import (
 	// "math/rand"
 	"net"
 	"errors"
+	"sort"
+	"os/exec"
+
 
 	"github.com/lni/dragonboat/v3"
 	"github.com/lni/dragonboat/v3/config"
@@ -296,7 +299,7 @@ func main() {
 		// then runs the commands required
 		// nextTime :=  time.Now().Truncate(time.Minute)
 		// time.Sleep(time.Until(nextTime))
-		ticker := time.NewTicker(10 * time.Second)
+		ticker := time.NewTicker(3 * time.Second) //TODO: REPLACE WITH 60 seconds
 		for {
 			select {
 			case <-ticker.C:
@@ -310,7 +313,7 @@ func main() {
 					if err != nil {
 						panic(err)
 					}
-					ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+					ctx, cancel := context.WithTimeout(context.Background(), 58*time.Second)
 					result, err := nh.SyncRead(ctx, configuration.ClusterID, data)
 					if err == nil {											
 						items := make(map[string]string)
@@ -344,16 +347,35 @@ func main() {
 							}
 							fmt.Println("[SETTING UP] : Complete")
 						} else {
-							for key, value := range items { 
-								// if (key == ROOT_KEY) {
-								// 	continue;
-								// }
-								fmt.Println(key, value) 
+							var keys []string
+							for k := range items {
+								keys = append(keys, k)
+							}
+							sort.Strings(keys)
+							for _, k := range keys { 
+								if (k == ROOT_KEY) {
+									continue;
+								}								
+								cmd := &Command{}
+								if err:= json.Unmarshal([]byte(items[k]), &cmd); err == nil && cmd.Type != "" && cmd.Exec != "" {
+									fmt.Println(cmd)
+									switch cmd.Type {
+									case "nats":
+										fmt.Println("[WARNING] NATS Not implemented")
+									case "shell":
+										cmd := exec.Command(cmd.Exec, cmd.Args)
+										out, err := cmd.CombinedOutput()
+										if err == nil {
+											fmt.Printf("[EXECUTION COMPLETE] combined out:\n%s\n", string(out))	
+										}
+										
+									}
+								}
 							}
 						}
 					} else {
 						//TODO: Remove						
-						panic(err)
+						//panic(err)
 					}
 					cancel()
 				} else {
