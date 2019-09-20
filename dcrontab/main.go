@@ -30,8 +30,6 @@ import (
 	"strings"
 	"syscall"
 	"time"
-	// "math"
-	// "math/rand"
 	"net"
 	"errors"
 	"sort"
@@ -70,7 +68,6 @@ type Service struct {
 
 //* = everything, minute (0-59), hour (0-23, 0 = midnight), day (1-31), month (1-12), weekday (0-6, 0 = Sunday). 
 // Ex. every 10 minutes */10
-// Ex. 
 type Cron struct {
 	Minute string
 	Hour string
@@ -108,6 +105,11 @@ type Configuration struct {
 
 func checkCron(cron *Cron) bool {
 	//Let's check!
+	//t := time.Now().UTC()
+	//fmt.Println(t.Second())
+
+	//* = everything, minute (0-59), hour (0-23, 0 = midnight), day (1-31), month (1-12), weekday (0-6, 0 = Sunday). 
+	// Ex. every 10 minutes */10
 	return true
 }
 
@@ -376,6 +378,7 @@ func main() {
 									continue;
 								}								
 								cmd := &Command{}
+								fmt.Printf("[EXECUTION INIT] job %s\n", k)
 								if err:= json.Unmarshal([]byte(items[k]), &cmd); err == nil && cmd.Type != "" && cmd.Exec != "" {
 									if &cmd.Cron != nil && !checkCron(&cmd.Cron) {
 										continue
@@ -383,16 +386,25 @@ func main() {
 									switch cmd.Type {
 									case "nats":
 										gonats.publish(cmd.Exec, cmd.Args)
-										fmt.Printf("[EXECUTION COMPLETE] NATS, Input:\n%s\n", cmd)	
+										fmt.Printf("[EXECUTION COMPLETE] NATS job %s, Input:\n%s\n", k, cmd)	
 									case "shell":
 										//TODO: move to a go subroutine
-										cmd := exec.Command(cmd.Exec, cmd.Args)
-										out, err := cmd.CombinedOutput()
+										var run *exec.Cmd
+										if len(cmd.Args) > 0 {
+											run = exec.Command(cmd.Exec, cmd.Args)
+										} else {
+											run = exec.Command(cmd.Exec)										
+										}
+										out, err := run.CombinedOutput()
 										if err == nil {
-											fmt.Printf("[EXECUTION COMPLETE] SHELL, Input:\n%s\nOutput:\n%s\n", cmd, string(out))	
+											fmt.Printf("[EXECUTION COMPLETE] SHELL job %s, Input:\n%s\nOutput:\n%s\n", k, cmd, string(out))	
+										} else {
+											fmt.Printf("[ERROR] Execution failed for job %s, Input:\n%s\nOutput:\n%s\nError:\n%s\n", k, cmd, string(out), err)	
 										}
 										
 									}
+								} else {
+									fmt.Printf("[ERROR] Parsing job %s: %s", k, err)
 								}
 							}
 						}

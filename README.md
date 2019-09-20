@@ -19,14 +19,25 @@ make
 ```
 
 ### Adding items to crontab
-You can type in a message in one of the two following formats - 
+You can type in a cronjob directly into the console - but better to manage the jobs with the config.json.
 ```
 put key value
+```
+Ex.
+```
+put __dcron::99 {"Type":"shell","Exec":"ls"}
 ```
 or 
 ```
 get key
 ```
+
+### TODO
+
+- [ ] Run once (equivalent to @reboot)
+- [ ] Resolution down to seconds (minutes atm)
+- [ ] DELETE method
+- [ ] HTTPS & Auth Support
 
 
 #### Credits
