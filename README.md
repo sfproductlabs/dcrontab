@@ -1,5 +1,9 @@
 ## Distributed crontab (dcrontab)
 
+### Setup
+
+See the config.json file for all the options.
+
 #### Requirements
 **Go > Version 1.12**
 
