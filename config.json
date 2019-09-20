@@ -32,7 +32,7 @@
             "Retry": 0,
             "Critical" : false,
             "Cron": {
-                "Minute" : "26",
+                "Minute" : "52",
                 "Hour" : "*",
                 "Day" : "*",
                 "Month" : "*",

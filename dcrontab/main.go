@@ -111,7 +111,7 @@ func checkCron(cron *Cron) bool {
 	// Ex. every 10 minutes */10
 	every := regexp.MustCompile(`\*\/([0-9]+)`)
 	t := time.Now().UTC()
-	fmt.Println(cron)
+
 	//////////////////////////////////////// Minutes
 	min := t.Minute()
 	minFound := false
@@ -553,6 +553,7 @@ func main() {
 								fmt.Printf("[EXECUTION INIT] job %s\n", k)
 								if err:= json.Unmarshal([]byte(items[k]), &cmd); err == nil && cmd.Type != "" && cmd.Exec != "" {
 									if &cmd.Cron != nil && !checkCron(&cmd.Cron) {
+										fmt.Printf("[EXECUTION ABORTED] Not time for job %s\n", k)
 										continue
 									}
 									switch cmd.Type {
