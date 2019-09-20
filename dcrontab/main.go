@@ -35,6 +35,8 @@ import (
 	"sort"
 	"os/exec"
 	"log"
+	"strconv"
+	"regexp"
 
 	"github.com/lni/dragonboat/v3"
 	"github.com/lni/dragonboat/v3/config"
@@ -105,11 +107,181 @@ type Configuration struct {
 
 func checkCron(cron *Cron) bool {
 	//Let's check!
-	//t := time.Now().UTC()
-	//fmt.Println(t.Second())
-
 	//* = everything, minute (0-59), hour (0-23, 0 = midnight), day (1-31), month (1-12), weekday (0-6, 0 = Sunday). 
 	// Ex. every 10 minutes */10
+	every := regexp.MustCompile(`\*\/([0-9]+)`)
+	t := time.Now().UTC()
+	fmt.Println(cron)
+	//////////////////////////////////////// Minutes
+	min := t.Minute()
+	minFound := false
+	if cron.Minute == "*" || cron.Minute == "" {
+		minFound = true
+	} else {
+		for _, v := range strings.Split(cron.Minute,",") {
+			if v == "*" {
+				minFound = true
+				break
+			}
+			if m,err := strconv.Atoi(v); err == nil {
+				if min == m {
+					minFound = true
+					break
+				}
+			}
+			if div := every.FindStringSubmatch(v); len(div) > 1 {
+				if m,err := strconv.Atoi(div[1]); err == nil {
+					for check := 0; check < 60; check+=m {					
+						if min == check || m < 1 {
+							minFound = true
+							break
+						}
+					}
+				}	
+			}
+		}
+	}
+	if (!minFound) {
+		return false
+	}
+
+	//////////////////////////////////////// Hours
+	hr := t.Hour()
+	hrFound := false
+	if cron.Hour == "*" || cron.Hour == "" {
+		hrFound = true
+	} else {
+		for _, v := range strings.Split(cron.Hour,",") {
+			if v == "*" {
+				hrFound = true
+				break
+			}
+			if h,err := strconv.Atoi(v); err == nil {
+				if hr == h {
+					hrFound = true
+					break
+				}
+			}
+			if div := every.FindStringSubmatch(v); len(div) > 1 {
+				if h,err := strconv.Atoi(div[1]); err == nil {
+					for check := 0; check < 24; check+=h {					
+						if hr == check || h < 1 {
+							hrFound = true
+							break
+						}
+					}
+				}	
+			}
+		}
+	}
+	if (!hrFound) {
+		return false
+	}
+
+	//////////////////////////////////////// Day
+	day := t.Day()
+	dayFound := false
+	if cron.Day == "*" || cron.Day == "" {
+		dayFound = true
+	} else {
+		for _, v := range strings.Split(cron.Day,",") {
+			if v == "*" {
+				dayFound = true
+				break
+			}
+			if d,err := strconv.Atoi(v); err == nil {
+				if day == d {
+					dayFound = true
+					break
+				}
+			}
+			if div := every.FindStringSubmatch(v); len(div) > 1 {
+				if d,err := strconv.Atoi(div[1]); err == nil {
+					for check := 0; check < 60; check+=d {					
+						if day == check || d < 1 {
+							dayFound = true
+							break
+						}
+					}
+				}	
+			}
+		}
+	}
+	if (!dayFound) {
+		return false
+	}
+
+
+	//////////////////////////////////////// Month
+	mon := int(t.Month())
+	monFound := false
+	if cron.Month == "*" || cron.Month == "" {
+		monFound = true
+	} else {
+		for _, v := range strings.Split(cron.Month,",") {
+			if v == "*" {
+				monFound = true
+				break
+			}
+			if mo,err := strconv.Atoi(v); err == nil {
+				if mon == mo {
+					monFound = true
+					break
+				}
+			}
+			if div := every.FindStringSubmatch(v); len(div) > 1 {
+				if mo,err := strconv.Atoi(div[1]); err == nil {
+					for check := 1; check < 13; check+=mo {					
+						if mon == check || mo < 1 {
+							monFound = true
+							break
+						}
+					}
+				}	
+			}
+		}
+	}
+	if (!monFound) {
+		return false
+	}
+
+	//////////////////////////////////////// Weekday
+	wday := int(t.Weekday())
+	wdayFound := false
+	if cron.Weekday == "*" || cron.Weekday == "" {
+		wdayFound = true
+	} else {
+		for _, v := range strings.Split(cron.Weekday,",") {
+			if v == "*" {
+				wdayFound = true
+				break
+			}
+			if wd,err := strconv.Atoi(v); err == nil {
+				if wday == wd {
+					wdayFound = true
+					break
+				}
+			}
+			if div := every.FindStringSubmatch(v); len(div) > 1 {
+				if wd,err := strconv.Atoi(div[1]); err == nil {
+					for check := 0; check < 7; check+=wd {					
+						if wday == check || wd < 1 {
+							wdayFound = true
+							break
+						}
+					}
+				}	
+			}
+		}
+	}
+	if (!wdayFound) {
+		return false
+	}
+
+	//TODO: Seconds
+	//fmt.Println(t.Second())
+
+
 	return true
 }
 
@@ -320,7 +492,7 @@ func main() {
 		// then runs the commands required
 		// nextTime :=  time.Now().Truncate(time.Minute)
 		// time.Sleep(time.Until(nextTime))
-		ticker := time.NewTicker(3 * time.Second) //TODO: REPLACE WITH 60 seconds
+		ticker := time.NewTicker(60 * time.Second)
 		for {
 			select {
 			case <-ticker.C:
