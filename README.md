@@ -1,9 +1,15 @@
 ## Distributed crontab (dcrontab)
 
+### Setup
+
+See the config.json file for all the options.
+
 #### Requirements
 **Go > Version 1.12**
 
-WORK IN PROGRESS
+#### Optional Requirements
+
+NATS
 
 #### Building
 
