@@ -34,7 +34,6 @@ import (
 	"errors"
 	"sort"
 	"os/exec"
-	"log"
 	"strconv"
 	"regexp"
 
@@ -42,6 +41,7 @@ import (
 	"github.com/lni/dragonboat/v3/config"
 	"github.com/lni/dragonboat/v3/logger"
 	"github.com/lni/goutils/syncutil"
+	"github.com/lni/goutils/logutil"
 )
 
 type RequestType uint64
@@ -55,6 +55,23 @@ const (
 const (
 	ROOT_KEY string = "__dcron"
 )
+
+var (
+	plog = logger.GetLogger("dcrontab")
+)
+
+// NodeID returns a human friendly form of NodeID for logging purposes.
+func NodeID(nodeID uint64) string {
+	return logutil.NodeID(nodeID)
+}
+
+// ClusterID returns a human friendly form of ClusterID for logging purposes.
+func ClusterID(clusterID uint64) string {
+	return logutil.ClusterID(clusterID)
+}
+
+var dn = logutil.DescribeNode
+
 
 type Service struct {
 	Service  string
@@ -430,9 +447,11 @@ func main() {
 		Configuration: &configuration.NatsService,
 		AppConfig:     &configuration,
 	}
+	
 	err = gonats.connect()	 
+	
 	if err != nil && &configuration.NatsService != nil {
-		log.Fatalf("[CRITICAL] Could not connect to NATS Cluster. %s\n", err)		
+		plog.Panicf("%s [CRITICAL] Could not connect to NATS Cluster.\n, %v", dn(configuration.ClusterID, uint64(*nodeID)), err)
 	}
 
 	//////////////////////////////////////// Setup RAFT
@@ -512,7 +531,7 @@ func main() {
 						items := make(map[string]string)
 						json.Unmarshal(result.([]byte), &items)
 						if len(items) == 0 {
-							fmt.Println("[SETTING UP] : Running")
+							plog.Infof("%s [SETTING UP] : Running\n", dn(configuration.ClusterID, uint64(*nodeID)))							
 							//First time we've run
 							//Add the root key 
 							action := &Action{
@@ -526,7 +545,7 @@ func main() {
 							}
 							_, err = nh.SyncPropose(ctx, cs, data)
 							if err != nil {
-								fmt.Fprintf(os.Stderr, "SyncPropose returned error %v\n", err)
+								plog.Infof("%s [ERROR] SyncPropose returned error %v\n", dn(configuration.ClusterID, uint64(*nodeID)), err)
 							}
 							//and populate commands
 							for idx, v := range configuration.Commands {
@@ -538,7 +557,7 @@ func main() {
 									}
 								}
 							}
-							fmt.Println("[SETTING UP] : Complete")
+							plog.Infof("%s [SETTING UP] : Complete\n", dn(configuration.ClusterID, uint64(*nodeID)))							
 						} else {
 							var keys []string
 							for k := range items {
@@ -550,16 +569,17 @@ func main() {
 									continue;
 								}								
 								cmd := &Command{}
-								fmt.Printf("[EXECUTION INIT] job %s\n", k)
+
+								plog.Infof("%s [EXECUTION INIT] job %s\n", dn(configuration.ClusterID, uint64(*nodeID)), k)							
 								if err:= json.Unmarshal([]byte(items[k]), &cmd); err == nil && cmd.Type != "" && cmd.Exec != "" {
 									if &cmd.Cron != nil && !checkCron(&cmd.Cron) {
-										fmt.Printf("[EXECUTION ABORTED] Not time for job %s\n", k)
+										plog.Infof("%s [EXECUTION ABORTED] Not time for job %s\n", dn(configuration.ClusterID, uint64(*nodeID)), k)							
 										continue
 									}
 									switch cmd.Type {
 									case "nats":
 										gonats.publish(cmd.Exec, cmd.Args)
-										fmt.Printf("[EXECUTION COMPLETE] NATS job %s, Input:\n%s\n", k, cmd)	
+										plog.Infof("%s [EXECUTION COMPLETE] NATS job %s, Input:\n%s\n", dn(configuration.ClusterID, uint64(*nodeID)), k, cmd)							
 									case "shell":
 										//TODO: move to a go subroutine
 										var run *exec.Cmd
@@ -570,14 +590,14 @@ func main() {
 										}
 										out, err := run.CombinedOutput()
 										if err == nil {
-											fmt.Printf("[EXECUTION COMPLETE] SHELL job %s, Input:\n%s\nOutput:\n%s\n", k, cmd, string(out))	
+											plog.Infof("%s [EXECUTION COMPLETE] SHELL job %s, Input:\n%s\nOutput:\n%s\n", dn(configuration.ClusterID, uint64(*nodeID)), k, cmd, string(out))							
 										} else {
-											fmt.Printf("[ERROR] Execution failed for job %s, Input:\n%s\nOutput:\n%s\nError:\n%s\n", k, cmd, string(out), err)	
+											plog.Infof("%s [ERROR] Execution failed for job %s, Input:\n%s\nOutput:\n%s\nError:\n%v\n", dn(configuration.ClusterID, uint64(*nodeID)), k, cmd, string(out), err)							
 										}
 										
 									}
 								} else {
-									fmt.Printf("[ERROR] Parsing job %s: %s", k, err)
+									plog.Infof("%s [ERROR] Parsing job %s: %v\n", dn(configuration.ClusterID, uint64(*nodeID)), k, err)	
 								}
 							}
 						}
@@ -587,7 +607,7 @@ func main() {
 					}
 					cancel()
 				} else {
-					fmt.Printf("Deferring command to node: %d\n", leader)
+					plog.Infof("%s [INFO] Deferring command to node: %d\n", dn(configuration.ClusterID, uint64(*nodeID)), leader)	
 				}				
 			case <-leaderStopper.ShouldStop():
 				return
@@ -626,14 +646,14 @@ func main() {
 					}
 					_, err = nh.SyncPropose(ctx, cs, data)
 					if err != nil {
-						fmt.Fprintf(os.Stderr, "SyncPropose returned error %v\n", err)
+						plog.Infof("%s [ERROR] SyncPropose returned error %v\n", dn(configuration.ClusterID, uint64(*nodeID)), err)							
 					}
 				} else {
 					result, err := nh.SyncRead(ctx, configuration.ClusterID, []byte(key))
 					if err != nil {
-						fmt.Fprintf(os.Stderr, "SyncRead returned error %v\n", err)
+						plog.Infof("%s [ERROR] SyncRead returned error %v\n", dn(configuration.ClusterID, uint64(*nodeID)), err)	
 					} else {
-						fmt.Fprintf(os.Stdout, "query key: %s, result: %s\n", key, result)
+						plog.Infof("%s [INFO] Successful query key: %s, result: %s \n", dn(configuration.ClusterID, uint64(*nodeID)), key, result)	
 					}
 				}
 				cancel()
