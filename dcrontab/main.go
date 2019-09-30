@@ -38,6 +38,7 @@ import (
 	"regexp"
 
 	"github.com/lni/dragonboat/v3"
+	//"github.com/lni/dragonboat/plugin/rpc"
 	"github.com/lni/dragonboat/v3/config"
 	"github.com/lni/dragonboat/v3/logger"
 	"github.com/lni/goutils/syncutil"
@@ -473,6 +474,11 @@ func main() {
 		NodeHostDir:    datadir,
 		RTTMillisecond: 200,
 		RaftAddress:    nodeAddr,
+		//RaftRPCFactory: rpc.NewRaftGRPC,
+		MutualTLS: configuration.UseTLS,
+		CAFile: configuration.TLSCACert,
+		CertFile: configuration.TLSCert,
+		KeyFile: configuration.TLSKey,
 	}
 	nh, err := dragonboat.NewNodeHost(nhc)
 	if err != nil {

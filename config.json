@@ -1,14 +1,14 @@
 {
     "ClusterID": 128,
     "Addresses": [
-        "172.17.0.1:63001",
+        "localhost:63001",
 		"localhost:63002",
 		"localhost:63003"
     ],
     "Debug": true,
-    "UseLocalTLS": true,
-    "TLSCert" : "./keys/example/server.crt",
-    "TLSKey" : "./keys/example/server.key",
+    "UseTLS": true,
+    "TLSCert" : "./keys/example/node1.crt",
+    "TLSKey" : "./keys/example/node1.key",
     "TLSCACert" : "./keys/example/ca.crt",
     "NatsService": {
         "Service": "nats",
@@ -39,7 +39,7 @@
                 "Weekday" : "*",
                 "Once": false
             },
-            "Comment" : "Demo command runs every minute"
+            "Comment" : "Demo command runs every 52nd minute"
         },
         {
             "Type": "nats",
