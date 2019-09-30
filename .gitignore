@@ -1,7 +1,6 @@
 dcrontab-data
 keys/
 /dcron
-/dcrontab/gorocksdb
 cpphelloworld/cpphelloworld
 *.o
 *.so
