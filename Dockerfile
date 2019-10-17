@@ -11,7 +11,8 @@ RUN apt update \
 #     && apt upgrade -y --no-install-recommends \     
      && apt install -y build-essential cmake libjemalloc-dev libjemalloc2 libbz2-dev libsnappy-dev zlib1g-dev liblz4-dev libzstd-dev \
      sudo \
-     supervisor 
+     supervisor \
+     netcat
 
 COPY supervisor.conf /etc/supervisor.conf
 COPY dcron.supervisor.conf /etc/supervisor/conf.d/dcron.supervisor.conf
@@ -59,6 +60,7 @@ RUN make install-rocksdb-ull
 
 WORKDIR /app/dcrontab
 ADD . /app/dcrontab
+RUN rm -rf dcrontab-data
 RUN go get
 RUN make
 
