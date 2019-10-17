@@ -9,9 +9,12 @@ EXPOSE 6003
 
 RUN apt update \
 #     && apt upgrade -y --no-install-recommends \     
-     && apt install -y build-essential cmake libjemalloc-dev libjemalloc2 libbz2-dev libsnappy-dev zlib1g-dev liblz4-dev libzstd-dev
+     && apt install -y build-essential cmake libjemalloc-dev libjemalloc2 libbz2-dev libsnappy-dev zlib1g-dev liblz4-dev libzstd-dev \
+     sudo \
+     supervisor 
 
-
+COPY supervisor.conf /etc/supervisor.conf
+COPY dcron.supervisor.conf /etc/supervisor/conf.d/dcron.supervisor.conf
 
 # # installing latest gflags
 # RUN cd /tmp && \
