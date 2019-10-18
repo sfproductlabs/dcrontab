@@ -1,5 +1,8 @@
 # Distributed crontab (dcrontab)
 
+* Supports Running a single crontab across a cluster of machines with a resolution down to a minute
+* Use this for critical service operations like updating auction items at the end of an auction.
+
 ## Running on Docker
 From the directory:
 
