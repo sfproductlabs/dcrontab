@@ -515,8 +515,9 @@ func main() {
 		cs := nh.GetNoOPSession(configuration.ClusterID)
 		// this goroutine makes a linearizable read every 60 seconds
 		// then runs the commands required
-		// nextTime :=  time.Now().Truncate(time.Minute)
-		// time.Sleep(time.Until(nextTime))
+		nextTime :=  time.Now().Truncate(time.Minute)
+		time.Sleep(time.Until(nextTime.Add(1*time.Second)))
+		nextTime =  nextTime.Add(1*time.Minute)
 		ticker := time.NewTicker(60 * time.Second)
 		for {
 			select {
@@ -611,13 +612,21 @@ func main() {
 						//TODO: Remove						
 						//panic(err)
 					}
+					nextTime = nextTime.Add(time.Minute)
+					if until := time.Until(nextTime); until > 0 {
+						time.Sleep(until)
+						plog.Infof("%s %s [TIMER]\n", time.Now(), until)
+						ticker = time.NewTicker(60 * time.Second)
+					} else {
+						nextTime = time.Now().Truncate(time.Minute)
+					}
 					cancel()
 				} else {
 					plog.Infof("%s [INFO] Deferring command to node: %d\n", dn(configuration.ClusterID, uint64(*nodeID)), leader)	
 				}				
 			case <-leaderStopper.ShouldStop():
 				return
-			}
+			}			
 		}
 	})
 
