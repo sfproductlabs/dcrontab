@@ -1,4 +1,67 @@
-## Distributed crontab (dcrontab)
+# Distributed crontab (dcrontab)
+
+## Running on Docker
+From the directory:
+
+```sudo docker build -t dcrontab .```
+
+### Docker Compose
+Add this to your docker-compose.yml (Version 3). You must add >1 machines to cluster.
+
+Example:
+```
+version: '3'
+services:
+  nats:
+    build: nats:latest
+    ports:
+      - "4222:4222"
+      - "6222:6222"
+      - "8222:8222"
+    networks:
+      - default
+  dcron1:
+    image: dcrontab:latest
+    command: sh -c '/app/dcrontab/wait-for localhost:4222 -t 300 -- sleep 3 && /app/dcrontab/dockercmd.sh'
+    depends_on:
+      - "nats"
+    expose:
+      - "6001"
+    ports:
+      - "6001:6001"
+    network_mode: host  
+    environment:
+      - "NODEID=1"   
+dcron2:
+    image: dcrontab:latest
+    command: sh -c '/app/dcrontab/wait-for localhost:4222 -t 300 -- sleep 3 && /app/dcrontab/dockercmd.sh'
+    depends_on:
+      - "nats"
+    expose:
+      - "6002"
+    ports:
+      - "6002:6002"
+    network_mode: host  
+    environment:
+      - "NODEID=2"   
+dcron3:
+    image: dcrontab:latest
+    command: sh -c '/app/dcrontab/wait-for localhost:4222 -t 300 -- sleep 3 && /app/dcrontab/dockercmd.sh'
+    depends_on:
+      - "nats"
+    expose:
+      - "6003"
+    ports:
+      - "6003:6003"
+    network_mode: host  
+    environment:
+      - "NODEID=3"         
+```
+
+Then run:
+```sudo docker-compose up```
+
+## Running from source
 
 ### Setup
 
