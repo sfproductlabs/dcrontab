@@ -3,6 +3,10 @@
 * Supports Running a single crontab across a cluster of machines with a resolution down to a minute
 * Use this for critical service operations like updating auction items at the end of an auction.
 
+## Getting the package from Github docker registry
+
+https://github.com/dioptre/dcrontab/packages/48583
+
 ## Running on Docker
 From the directory:
 
