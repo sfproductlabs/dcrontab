@@ -8,11 +8,47 @@ EXPOSE 6002
 EXPOSE 6003
 
 RUN apt update \
-#     && apt upgrade -y --no-install-recommends \     
-     && apt install -y build-essential cmake libjemalloc-dev libjemalloc2 libbz2-dev libsnappy-dev zlib1g-dev liblz4-dev libzstd-dev \
+     && apt install -y build-essential cmake libjemalloc-dev libbz2-dev libsnappy-dev zlib1g-dev liblz4-dev libzstd-dev \
      sudo \
      supervisor \
      netcat
+
+############
+## Physical instructions:
+############
+# apt install git
+# apt upgrade
+
+## Get good go build 
+## https://golang.org/dl/
+
+# wget https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz
+#tar -xvf go1.13.3.linux-amd64.tar.gz
+#sudo mv go /usr/local
+#mkdir projects
+#cd projects/
+#mkdir go
+#vi ~/.bashrc 
+
+## Add to .bashrc
+#echo "export GOROOT=/usr/local/go" >> ~/.bashrc
+#echo "export GOPATH=$HOME/projects/go" >> ~/.bashrc
+#echo "export PATH=$GOPATH/bin:$GOROOT/bin:$PATH" >> ~/.bashrc
+
+# cd ~/projects
+# git clone https://github.com/lni/dragonboat
+# cd dragonboat
+# ROCKSDB_VER=5.17.2 make install-rocksdb-ull
+
+# cd ~/projects
+# git clone https://github.com/dioptre/dcrontab
+# cd dcrontab
+# go get
+# make
+
+#sudo mkdir /app
+#sudo chown admin:admin /app
+#ln -s /home/admin/projects/dcrontab /app/dcrontab
 
 COPY supervisor.conf /etc/supervisor.conf
 COPY dcron.supervisor.conf /etc/supervisor/conf.d/dcron.supervisor.conf
