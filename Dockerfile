@@ -42,8 +42,9 @@ RUN apt update \
 
 # cd ~/projects
 # git clone https://github.com/dioptre/dcrontab
-# cd dcrontab
+# cd dcrontab/dcrontab
 # go get
+# cd ..
 # make
 
 #sudo mkdir /app
