@@ -33,7 +33,7 @@ RUN apt update \
 ## Add to .bashrc
 #echo "export GOROOT=/usr/local/go" >> ~/.bashrc
 #echo "export GOPATH=$HOME/projects/go" >> ~/.bashrc
-#echo "export PATH=$GOPATH/bin:$GOROOT/bin:$PATH" >> ~/.bashrc
+#echo "export PATH=$HOME/projects/go/bin:/usr/local/go/bin:$PATH" >> ~/.bashrc
 
 # cd ~/projects
 # git clone https://github.com/lni/dragonboat
@@ -50,6 +50,15 @@ RUN apt update \
 #sudo mkdir /app
 #sudo chown admin:admin /app
 #ln -s /home/admin/projects/dcrontab /app/dcrontab
+
+#sudo ln /home/admin/projects/dcrontab/supervisor.conf /etc/supervisor.conf
+#sudo ln /home/admin/projects/dcrontab/dcron.supervisor.conf /etc/supervisor/conf.d/dcron.supervisor.conf
+
+##UPDATE THE CONFIG FILE
+
+## Change hostname on amazon jessie 
+#sudo hostnamectl set-hostname dcrontab1
+#sudo reboot
 
 COPY supervisor.conf /etc/supervisor.conf
 COPY dcron.supervisor.conf /etc/supervisor/conf.d/dcron.supervisor.conf
