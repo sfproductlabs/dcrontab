@@ -114,6 +114,7 @@ type Configuration struct {
 	NodeID					 int
 	Address				 	 string
 	Addresses                []string 
+	UseHostnameIdentification bool
 	UseTLS              	 bool
 	TLSCACert                string
 	TLSCert                  string
@@ -417,6 +418,18 @@ func main() {
 					if strings.HasPrefix(v, ip) {
 						*nodeID = idx + 1;
 						break
+					}
+					if (configuration.UseHostnameIdentification) {
+						hn := strings.Split(v, ":")[0];
+						if hnips, err := net.LookupIP(hn); err == nil {
+							for _, hnip := range hnips {
+								fmt.Printf("%s", hnip.String())
+								if ip == hnip.String() {
+									*nodeID = idx + 1;
+									break
+								}
+							}
+						}				
 					}
 				}
 			}
