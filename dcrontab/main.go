@@ -423,7 +423,6 @@ func main() {
 						hn := strings.Split(v, ":")[0];
 						if hnips, err := net.LookupIP(hn); err == nil {
 							for _, hnip := range hnips {
-								fmt.Printf("%s", hnip.String())
 								if ip == hnip.String() {
 									*nodeID = idx + 1;
 									break
