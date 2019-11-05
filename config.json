@@ -8,9 +8,9 @@
     "UseHostnameIdentification": true,
     "Debug": true,
     "UseTLS": true,
-    "TLSCert" : "./keys/example/node1.crt",
-    "TLSKey" : "./keys/example/node1.key",
-    "TLSCACert" : "./keys/example/ca.crt",
+    "TLSCert" : "./keys/staging/dcrontab1.crt",
+    "TLSKey" : "./keys/staging/dcrontab1.key",
+    "TLSCACert" : "./keys/staging/rootCa.crt",
     "NatsService": {
         "Service": "nats",
         "Hosts": [
