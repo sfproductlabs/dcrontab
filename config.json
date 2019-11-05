@@ -1,11 +1,11 @@
 {
     "ClusterID": 128,
     "Addresses": [
-        "localhost:63001",
-		"localhost:63002",
-		"localhost:63003"
+        "dcrontab1:63000",
+		"dcrontab2:63000",
+		"dcrontab3:63000"
     ],
-    "UseHostnameIdentification": false,
+    "UseHostnameIdentification": true,
     "Debug": true,
     "UseTLS": true,
     "TLSCert" : "./keys/example/node1.crt",
