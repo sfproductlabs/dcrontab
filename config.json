@@ -5,6 +5,7 @@
 		"localhost:63002",
 		"localhost:63003"
     ],
+    "UseHostnameIdentification": false,
     "Debug": true,
     "UseTLS": true,
     "TLSCert" : "./keys/example/node1.crt",
