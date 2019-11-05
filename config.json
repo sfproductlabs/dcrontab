@@ -14,7 +14,7 @@
     "NatsService": {
         "Service": "nats",
         "Hosts": [
-            "tls://localhost:4222"
+            "tls://nats-seed1:4222"
         ],
         "Context": "toc.track.notify",
         "Secure": true,
