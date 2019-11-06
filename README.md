@@ -13,6 +13,7 @@ https://github.com/dioptre/dcrontab/packages/48583
 * Setup dcrontab1 and more on your private dns (see the config file) names will resolve
 * Generate the certs per the ./keys/production/gencerts.sh (the first time generate a CA Ex. ```./gencerts 1 ca```)
 * Update the config file with your key/node (use dcrontab[0-9]*)
+* The example requires a nats service to be setup, but you can disable it if you wish.
 
 ## Running on Docker
 From the directory:
