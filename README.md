@@ -87,7 +87,7 @@ See the config.json file for all the options.
 
 #### Optional Requirements
 
-NATS
+NATS - https://nats.io
 
 #### Building
 
