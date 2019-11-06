@@ -9,7 +9,7 @@ https://github.com/dioptre/dcrontab/packages/48583
 
 ## Running on AWS
 * Use the production branch https://github.com/dioptre/dcrontab/tree/production
-* You can use docker or build manually if you wish (see the commented lines in docker - assumes a debian/Ubuntu distribution)
+* You can use docker or build manually if you wish (see the commented lines in ./Dockerfile - assumes a debian/Ubuntu distribution)
 * Setup dcrontab1 and more on your private dns (see the config file) names will resolve
 * Generate the certs per the ./keys/production/gencerts.sh (the first time generate a CA Ex. ```./gencerts 1 ca```)
 * Update the config file with your key/node (use dcrontab[0-9]*)
