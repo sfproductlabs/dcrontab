@@ -3,6 +3,7 @@
 * Supports Running a single crontab across a cluster of machines with a resolution down to a minute
 * Use this for critical service operations like updating auction items at the end of an auction.
 
+
 ## Getting the package from Github docker registry
 
 https://github.com/dioptre/dcrontab/packages/48583
@@ -82,8 +83,9 @@ Then run:
 
 See the config.json file for all the options.
 
-#### Requirements
+#### Requirements / Dependencies
 **Go > Version 1.12**
+RocksDB (try something like brew install rocksdb)
 
 #### Optional Requirements
 
@@ -93,6 +95,12 @@ NATS - https://nats.io
 
 ```
 make
+```
+
+or on mac I need to
+
+```
+IPHONEOS_DEPLOYMENT_TARGET= SDKROOT= make
 ```
 
 #### Running
