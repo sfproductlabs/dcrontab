@@ -80,8 +80,10 @@ Then run:
 ## Running from source
 
 ### Setup
+Follow the instructions for building inside the 
+```Dockerfile```
 
-See the config.json file for all the options.
+See the **config.json** file for all the options.
 
 #### Requirements / Dependencies
 **Go > Version 1.12**
