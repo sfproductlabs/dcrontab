@@ -93,7 +93,59 @@ RocksDB (try something like brew install rocksdb)
 
 NATS - https://nats.io
 
-#### Building
+#### Building from source
+
+```
+sudo apt update \
+     && sudo apt install -y build-essential cmake libjemalloc-dev libbz2-dev libsnappy-dev zlib1g-dev liblz4-dev libzstd-dev \
+     sudo \
+     supervisor \
+     netcat
+
+sudo apt install git
+sudo apt upgrade
+
+wget https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz
+tar -xvf go1.13.4.linux-amd64.tar.gz
+sudo mv go /usr/local
+mkdir projects
+cd projects/
+mkdir go
+#vi ~/.bashrc 
+
+## Add to .bashrc
+echo "export GOROOT=/usr/local/go" >> ~/.bashrc
+echo "export GOPATH=$HOME/projects/go" >> ~/.bashrc
+echo "export PATH=$HOME/projects/go/bin:/usr/local/go/bin:$PATH" >> ~/.bashrc
+
+cd ~/projects
+git clone https://github.com/lni/dragonboat
+cd dragonboat
+ROCKSDB_VER=5.17.2 make install-rocksdb-ull
+
+cd ~/projects
+git clone https://github.com/dioptre/dcrontab
+cd dcrontab/dcrontab
+go get
+cd ..
+make
+
+sudo mkdir /app
+sudo chown admin:admin /app
+ln -s /home/admin/projects/dcrontab /app/dcrontab
+
+sudo ln /home/admin/projects/dcrontab/supervisor.conf /etc/supervisor.conf
+sudo ln /home/admin/projects/dcrontab/dcron.supervisor.conf /etc/supervisor/conf.d/dcron.supervisor.conf
+
+##UPDATE THE CONFIG FILE
+
+## Change hostname on amazon jessie 
+#sudo hostnamectl set-hostname dcrontab1
+#sudo reboot
+
+```
+
+then 
 
 ```
 make
