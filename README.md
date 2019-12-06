@@ -118,16 +118,40 @@ echo "export GOROOT=/usr/local/go" >> ~/.bashrc
 echo "export GOPATH=$HOME/projects/go" >> ~/.bashrc
 echo "export PATH=$HOME/projects/go/bin:/usr/local/go/bin:$PATH" >> ~/.bashrc
 
-cd ~/projects
-git clone https://github.com/lni/dragonboat
-cd dragonboat
-ROCKSDB_VER=5.17.2 make install-rocksdb-ull
+# installing latest gflags
+cd /tmp && \
+     git clone https://github.com/gflags/gflags.git && \
+     cd gflags && \
+     mkdir build && \
+     cd build && \
+     cmake -DBUILD_SHARED_LIBS=1 -DGFLAGS_INSTALL_SHARED_LIBS=1 .. && \
+     sudo make install && \
+     cd /tmp && \
+     rm -R /tmp/gflags/
+
+# Install Rocksdb
+cd /tmp && \
+     git clone https://github.com/facebook/rocksdb.git && \
+     cd rocksdb && \
+     git checkout v6.3.6 && \
+     make shared_lib && \
+     sudo mkdir -p /usr/local/rocksdb/lib && \
+     sudo mkdir /usr/local/rocksdb/include && \
+     sudo cp librocksdb.so* /usr/local/rocksdb/lib && \
+     sudo cp /usr/local/rocksdb/lib/librocksdb.so* /usr/lib/ && \
+     sudo cp -r include /usr/local/rocksdb/ && \
+     sudo cp -r include/* /usr/include/ && \
+     rm -R /tmp/rocksdb/
+
+#Install Gorocksdb
+CGO_CFLAGS="-I/usr/local/rocksdb/include" \
+     CGO_LDFLAGS="-L/usr/local/rocksdb/lib -lrocksdb -lstdc++ -lm -lz -lbz2 -lsnappy -llz4 -lzstd" \
+     go get github.com/tecbot/gorocksdb
+
 
 cd ~/projects
 git clone https://github.com/dioptre/dcrontab
-cd dcrontab/dcrontab
-go get
-cd ..
+cd dcrontab
 make
 
 sudo mkdir /app
