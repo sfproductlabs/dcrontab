@@ -137,6 +137,9 @@ ln -s /home/admin/projects/dcrontab /app/dcrontab
 sudo ln /home/admin/projects/dcrontab/supervisor.conf /etc/supervisor.conf
 sudo ln /home/admin/projects/dcrontab/dcron.supervisor.conf /etc/supervisor/conf.d/dcron.supervisor.conf
 
+
+sudo systemctl enable supervisor.service
+
 ##UPDATE THE CONFIG FILE
 
 ## Change hostname on amazon jessie 
