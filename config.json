@@ -8,9 +8,9 @@
     "UseHostnameIdentification": false,
     "Debug": true,
     "UseTLS": true,
-    "TLSCert" : "./keys/example/node1.crt",
-    "TLSKey" : "./keys/example/node1.key",
-    "TLSCACert" : "./keys/example/ca.crt",
+    "TLSCert" : "./keys/node1.crt",
+    "TLSKey" : "./keys/node1.key",
+    "TLSCACert" : "./keys/ca.crt",
     "NatsService": {
         "Service": "nats",
         "Hosts": [
@@ -18,9 +18,9 @@
         ],
         "Context": "toc.track.notify",
         "Secure": true,
-        "CACert": "./keys/staging/rootCa.crt",
-        "Cert": "./keys/staging/nats-client.crt",
-        "Key": "./keys/staging/nats-client.key",
+        "CACert": "./keys/rootCa.crt",
+        "Cert": "./keys/nats-client.crt",
+        "Key": "./keys/nats-client.key",
         "Format": "json"
     },
     "Commands": [
